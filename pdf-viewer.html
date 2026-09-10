@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Score Card</title>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+html, body {
+    margin: 0;
+    padding: 0;
+    background: #222;
+    width: 100%;
+    min-height: 100%;
+}
+
+#pdf-container {
+    width: 100%;
+    padding: 10px 0 55px;
+}
+
+.page {
+    display: block;
+    width: 100%;
+    height: auto;
+    margin: 0 auto 10px;
+    background: white;
+    box-shadow: 0 2px 8px rgba(0,0,0,.4);
+}
+</style>
+</head>
+
+<body>
+
+<div id="pdf-container"></div>
+
+<script>
+const container = document.getElementById("pdf-container");
+
+async function loadPDF() {
+    try {
+
+        const pdf = await pdfjsLib.getDocument({
+            url: "./SCORE_CARD_DMRC_2026004321.pdf",
+            disableWorker: true
+        }).promise;
+
+        for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber++) {
+
+            const page = await pdf.getPage(pageNumber);
+
+            const viewport = page.getViewport({
+                scale: 1.5
+            });
+
+            const canvas = document.createElement("canvas");
+
+            canvas.className = "page";
+
+            canvas.width = viewport.width;
+            canvas.height = viewport.height;
+
+            const context = canvas.getContext("2d");
+
+            container.appendChild(canvas);
+
+            await page.render({
+                canvasContext: context,
+                viewport: viewport
+            }).promise;
+        }
+
+    } catch (error) {
+
+        console.error("PDF ERROR:", error);
+
+        container.innerHTML =
+            "<div style='color:white;text-align:center;padding:40px;font-family:Arial'>" +
+            "PDF could not be displayed." +
+            "</div>";
+    }
+}
+
+loadPDF();
+</script>
+
+</body>
+</html>
