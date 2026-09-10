@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Score Card</title>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    margin: 0;
+    padding: 0;
+    background: #222;
+    width: 100%;
+    min-height: 100%;
+}
+
+body {
+    overflow-x: hidden;
+}
+
+#pdf-container {
+    width: 100%;
+    padding: 10px 0 55px;
+}
+
+.page {
+    display: block;
+    width: 100%;
+    height: auto;
+    margin: 0 auto 10px;
+    background: white;
+    box-shadow: 0 2px 8px rgba(0,0,0,.4);
+}
+
+.notice {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    padding: 7px;
+    text-align: center;
+    background: rgba(0,0,0,.9);
+    color: #fff;
+    font: 12px Arial, sans-serif;
+    z-index: 999;
+}
+</style>
+</head>
+
+<body>
+
+<div id="pdf-container"></div>
+
+<div class="notice">
+   
+</div>
+
+<script>
+// @ts-nocheck
+
+pdfjsLib.GlobalWorkerOptions.workerSrc =
+"https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+
+const container = document.getElementById("pdf-container");
+
+pdfjsLib.getDocument("SCORE_CARD_DMRC_2026004321.pdf").promise
+.then(async (pdf) => {
+
+    for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber++) {
+
+        const page = await pdf.getPage(pageNumber);
+
+        const viewport = page.getViewport({
+            scale: 1.5
+        });
+
+        const canvas = document.createElement("canvas");
+        canvas.className = "page";
+
+        const context = canvas.getContext("2d");
+
+        canvas.width = viewport.width;
+        canvas.height = viewport.height;
+
+        container.appendChild(canvas);
+
+        await page.render({
+            canvasContext: context,
+            viewport: viewport
+        }).promise;
+    }
+
+})
+.catch((error) => {
+
+    container.innerHTML =
+        "<p style='color:white;text-align:center;padding:30px;font-family:Arial'>" +
+        "Unable to display the document." +
+        "</p>";
+
+    console.error(error);
+});
+</script>
+
+</body>
+</html>
