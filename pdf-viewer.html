@@ -1,12 +1,21 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
+
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0">
 
 <title>Score Card</title>
 
+<!-- PDF.js Library -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+
 <style>
+
 * {
     box-sizing: border-box;
 }
@@ -50,62 +59,87 @@ body {
     font: 12px Arial, sans-serif;
     z-index: 999;
 }
+
 </style>
+
 </head>
+
 
 <body>
 
 <div id="pdf-container"></div>
 
-<div class="notice">
-   
-</div>
+<div class="notice"></div>
+
 
 <script>
-// @ts-nocheck
 
+// PDF.js worker
 pdfjsLib.GlobalWorkerOptions.workerSrc =
 "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
 
-const container = document.getElementById("pdf-container");
+const container =
+document.getElementById("pdf-container");
 
-pdfjsLib.getDocument("SCORE_CARD_DMRC_2026004321.pdf").promise
+pdfjsLib
+.getDocument("SCORE_CARD_DMRC_2026004321.pdf")
+.promise
+
 .then(async (pdf) => {
 
-    for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber++) {
+    for (
+        let pageNumber = 1;
+        pageNumber <= pdf.numPages;
+        pageNumber++
+    ) {
 
-        const page = await pdf.getPage(pageNumber);
+        const page =
+        await pdf.getPage(pageNumber);
 
-        const viewport = page.getViewport({
+        const viewport =
+        page.getViewport({
             scale: 1.5
         });
 
-        const canvas = document.createElement("canvas");
+        const canvas =
+        document.createElement("canvas");
+
         canvas.className = "page";
 
-        const context = canvas.getContext("2d");
+        const context =
+        canvas.getContext("2d");
 
-        canvas.width = viewport.width;
-        canvas.height = viewport.height;
+        canvas.width =
+        viewport.width;
+
+        canvas.height =
+        viewport.height;
 
         container.appendChild(canvas);
 
         await page.render({
+
             canvasContext: context,
+
             viewport: viewport
+
         }).promise;
+
     }
 
 })
+
 .catch((error) => {
 
     container.innerHTML =
-        "<p style='color:white;text-align:center;padding:30px;font-family:Arial'>" +
-        "Unable to display the document." +
-        "</p>";
+    "<p style='color:white;text-align:center;padding:30px;font-family:Arial'>" +
+    "Unable to display the document." +
+    "</p>";
 
     console.error(error);
+
 });
+
 </script>
 
 </body>
