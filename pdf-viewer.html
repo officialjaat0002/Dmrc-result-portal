@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0">
+
+<title>Score Card</title>
+
+<style>
+
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    min-height: 100%;
+    background: #222;
+}
+
+body {
+    overflow-x: hidden;
+    padding-top: 55px;
+}
+
+/* TOP BAR */
+
+.toolbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 55px;
+
+    background: #8b0000;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 8px 12px;
+
+    z-index: 1000;
+
+    box-shadow: 0 2px 8px rgba(0,0,0,.4);
+}
+
+.title {
+    color: white;
+    font: bold 16px Arial, sans-serif;
+}
+
+.download-button {
+    display: inline-block;
+
+    padding: 9px 14px;
+
+    background: white;
+    color: #8b0000;
+
+    text-decoration: none;
+
+    border-radius: 5px;
+
+    font: bold 14px Arial, sans-serif;
+}
+
+/* PDF AREA */
+
+#pdf-container {
+    width: 100%;
+    padding: 10px 0 20px;
+}
+
+.page-wrapper {
+    width: 100%;
+    margin: 0 auto 10px;
+    background: white;
+    box-shadow: 0 2px 8px rgba(0,0,0,.4);
+}
+
+.page {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
+/* LOADING */
+
+#loading {
+    color: white;
+    text-align: center;
+    padding: 30px;
+    font: 15px Arial, sans-serif;
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+
+<!-- TOP BAR -->
+
+<div class="toolbar">
+
+    <div class="title">
+        Score Card
+    </div>
+
+    <a
+        class="download-button"
+        href="./SCORE_CARD_DMRC_2026004321.pdf"
+        download="SCORE_CARD_DMRC_2026004321.pdf">
+
+        ⬇ Download PDF
+
+    </a>
+
+</div>
+
+
+<!-- LOADING -->
+
+<div id="loading">
+    Loading Score Card...
+</div>
+
+
+<!-- PDF -->
+
+<div id="pdf-container"></div>
+
+
+<!-- PDF.JS -->
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+
+
+<script>
+
+async function showPDF() {
+
+    const loading =
+        document.getElementById("loading");
+
+    const container =
+        document.getElementById("pdf-container");
+
+    try {
+
+        if (typeof pdfjsLib === "undefined") {
+            throw new Error("PDF.js failed to load");
+        }
+
+
+        pdfjsLib.GlobalWorkerOptions.workerSrc =
+        "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+
+
+        const pdf =
+        await pdfjsLib.getDocument({
+            url: "./SCORE_CARD_DMRC_2026004321.pdf"
+        }).promise;
+
+
+        loading.style.display = "none";
+
+
+        /*
+         * DEVICE PIXEL RATIO
+         * makes text/images much sharper
+         */
+
+        const pixelRatio =
+            Math.max(
+                1,
+                Math.min(window.devicePixelRatio || 1, 3)
+            );
+
+
+        for (
+            let pageNumber = 1;
+            pageNumber <= pdf.numPages;
+            pageNumber++
+        ) {
+
+            const page =
+            await pdf.getPage(pageNumber);
+
+
+            const baseViewport =
+            page.getViewport({
+                scale: 1
+            });
+
+
+            /*
+             * Fit PDF to mobile screen
+             */
+
+            const screenWidth =
+            container.clientWidth;
+
+
+            const fitScale =
+            screenWidth / baseViewport.width;
+
+
+            const viewport =
+            page.getViewport({
+                scale: fitScale
+            });
+
+
+            /*
+             * High-resolution canvas
+             */
+
+            const canvas =
+            document.createElement("canvas");
+
+
+            canvas.className = "page";
+
+
+            const context =
+            canvas.getContext("2d", {
+                alpha: false
+            });
+
+
+            /*
+             * Physical canvas resolution
+             * is higher than displayed size
+             */
+
+            canvas.width =
+            Math.floor(
+                viewport.width * pixelRatio
+            );
+
+
+            canvas.height =
+            Math.floor(
+                viewport.height * pixelRatio
+            );
+
+
+            /*
+             * CSS size remains normal
+             */
+
+            canvas.style.width =
+            Math.floor(viewport.width) + "px";
+
+
+            canvas.style.height =
+            Math.floor(viewport.height) + "px";
+
+
+            const wrapper =
+            document.createElement("div");
+
+
+            wrapper.className =
+            "page-wrapper";
+
+
+            wrapper.appendChild(canvas);
+
+            container.appendChild(wrapper);
+
+
+            /*
+             * Render at high resolution
+             */
+
+            await page.render({
+
+                canvasContext: context,
+
+                viewport: viewport,
+
+                transform: [
+                    pixelRatio,
+                    0,
+                    0,
+                    pixelRatio,
+                    0,
+                    0
+                ]
+
+            }).promise;
+
+        }
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "PDF ERROR:",
+            error
+        );
+
+        loading.innerHTML =
+        "Unable to display Score Card.";
+
+    }
+
+}
+
+
+showPDF();
+
+</script>
+
+
+</body>
+
+</html>
