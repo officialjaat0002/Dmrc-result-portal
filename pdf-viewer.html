@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+<meta charset="UTF-8">
+
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0">
+
+<title>Score Card</title>
+
+<style>
+
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    min-height: 100%;
+    background: #222;
+}
+
+body {
+    overflow-x: hidden;
+}
+
+#pdf-container {
+    width: 100%;
+    padding: 10px 0 20px;
+}
+
+.page {
+    display: block;
+    width: 100%;
+    height: auto;
+    margin: 0 auto 10px;
+    background: white;
+    box-shadow: 0 2px 8px rgba(0,0,0,.4);
+}
+
+#loading {
+    color: white;
+    text-align: center;
+    padding: 30px;
+    font-family: Arial, sans-serif;
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+<div id="loading">
+    Loading Score Card...
+</div>
+
+<div id="pdf-container"></div>
+
+
+<!-- PDF.js -->
+
+<script
+src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js">
+</script>
+
+
+<script>
+
+async function showPDF() {
+
+    const loading =
+        document.getElementById("loading");
+
+    const container =
+        document.getElementById("pdf-container");
+
+    try {
+
+        if (typeof pdfjsLib === "undefined") {
+
+            throw new Error(
+                "PDF.js library failed to load"
+            );
+
+        }
+
+
+        pdfjsLib.GlobalWorkerOptions.workerSrc =
+        "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+
+
+        const pdf =
+        await pdfjsLib.getDocument({
+            url: "./SCORE_CARD_DMRC_2026004321.pdf"
+        }).promise;
+
+
+        loading.style.display = "none";
+
+
+        for (
+            let pageNumber = 1;
+            pageNumber <= pdf.numPages;
+            pageNumber++
+        ) {
+
+            const page =
+            await pdf.getPage(pageNumber);
+
+
+            const originalViewport =
+            page.getViewport({
+                scale: 1
+            });
+
+
+            const screenWidth =
+            window.innerWidth;
+
+
+            const scale =
+            screenWidth /
+            originalViewport.width;
+
+
+            const viewport =
+            page.getViewport({
+                scale: scale
+            });
+
+
+            const canvas =
+            document.createElement("canvas");
+
+
+            canvas.className = "page";
+
+
+            const context =
+            canvas.getContext("2d");
+
+
+            canvas.width =
+            viewport.width;
+
+
+            canvas.height =
+            viewport.height;
+
+
+            container.appendChild(canvas);
+
+
+            await page.render({
+
+                canvasContext: context,
+
+                viewport: viewport
+
+            }).promise;
+
+        }
+
+    }
+
+    catch (error) {
+
+        console.error(error);
+
+        loading.innerHTML =
+        "Unable to display Score Card.";
+
+    }
+
+}
+
+
+showPDF();
+
+</script>
+
+</body>
+
+</html>
